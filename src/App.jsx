@@ -13,7 +13,10 @@ import MenuPage from "./pages/customer/MenuPage";
 import PaymentPage from "./pages/customer/PaymentPage";
 import OrderPage from "./pages/customer/OrderPage";
 import BookingPage from "./pages/customer/BookingPage";
-import Reserve from "./component/Reserve";
+<<<<<<< HEAD
+
+=======
+>>>>>>> 19793467f7de4b065a90b30e0d9447f1939f4d56
 // import DeliveryTracking from "./pages/customer/DeliveryTracking";
 import OrderTrackingPage from "./pages/customer/OrderTrackingPage";
 import ProtectedRoute from "./component/ProtectedRoute";
@@ -118,6 +121,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+<<<<<<< HEAD
         <Route
           path="/reserve-test"
           element={
@@ -134,6 +138,8 @@ export default function App() {
             />
           }
         />
+=======
+>>>>>>> 19793467f7de4b065a90b30e0d9447f1939f4d56
 
         {/* COOK ROUTES */}
         <Route

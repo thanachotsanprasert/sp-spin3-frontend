@@ -7,9 +7,17 @@ const PickupConfirmation = ({
   detail = "", 
   person = "", 
   date = "",
+<<<<<<< HEAD
+<<<<<<< HEAD
   time = "",
   menuList = [],
   comment = ""
+=======
+  time = "" 
+>>>>>>> 19793467f7de4b065a90b30e0d9447f1939f4d56
+=======
+  time = "" 
+>>>>>>> 19793467f7de4b065a90b30e0d9447f1939f4d56
 }) => {
   if (!isOpen) return null;
 
