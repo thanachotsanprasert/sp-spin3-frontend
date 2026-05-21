@@ -1,22 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-import api from "../utils/api";
-
-export const loginAPI = async (username, password) => {
-  try {
-    const response = await api.post("/auth/login", { username, password });
-    // Assuming the backend returns an object with a token and user info
-    if (response.token) {
-      localStorage.setItem("token", response.token);
-    }
-    return response;
-  } catch (err) {
-    console.error("Auth Service Error:", err);
-    throw new Error(err.message || "ระบบตรวจสอบข้อมูลขัดข้อง");
-  }
-=======
-=======
->>>>>>> 19793467f7de4b065a90b30e0d9447f1939f4d56
 // จำลองการเรียก API ขึ้นมาคั่นกลาง เวลาย้ายไปใช้ B/E จะได้แก้แค่ไฟล์นี้ไฟล์เดียว
 
 import { usersInfo } from "../assets/usersInfo";
@@ -45,8 +26,4 @@ export const loginAPI = async (username, password) => {
       }
     }, 1000);
   });
-<<<<<<< HEAD
->>>>>>> 19793467f7de4b065a90b30e0d9447f1939f4d56
-=======
->>>>>>> 19793467f7de4b065a90b30e0d9447f1939f4d56
 };
