@@ -7,7 +7,9 @@ const PickupConfirmation = ({
   detail = "", 
   person = "", 
   date = "",
-  time = "" 
+  time = "",
+  menuList = [],
+  comment = ""
 }) => {
   if (!isOpen) return null;
 

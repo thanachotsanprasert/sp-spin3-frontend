@@ -13,6 +13,7 @@ import MenuPage from "./pages/customer/MenuPage";
 import PaymentPage from "./pages/customer/PaymentPage";
 import OrderPage from "./pages/customer/OrderPage";
 import BookingPage from "./pages/customer/BookingPage";
+import Reserve from "./component/Reserve";
 // import DeliveryTracking from "./pages/customer/DeliveryTracking";
 import OrderTrackingPage from "./pages/customer/OrderTrackingPage";
 import ProtectedRoute from "./component/ProtectedRoute";
@@ -115,6 +116,22 @@ export default function App() {
             <ProtectedRoute allowedRoles={["customer"]}>
               <OrderTrackingPage />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reserve-test"
+          element={
+            <Reserve 
+              isOpen={true} 
+              onClose={() => window.location.href = "/"}
+              tableNo="T-001"
+              detail="จองโต๊ะริมหน้าต่าง"
+              person="4 ท่าน"
+              date="2024-05-20"
+              time="18:30"
+              menuList={["ไก่ทอด 8 ชิ้น", "เฟรนช์ฟรายส์ (ใหญ่)"]}
+              comment="ขอเก้าอี้เด็ก 1 ตัว"
+            />
           }
         />
 

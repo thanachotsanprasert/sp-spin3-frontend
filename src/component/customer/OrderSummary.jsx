@@ -3,24 +3,28 @@ import React, { useState } from "react";
 export default function OrderSummary({ cartItems }) {
   const [promoCode, setPromoCode] = useState("");
   
-  // คำนวณยอดเงินรวม
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  // คำนวณยอดเงินรวม (ใช้ item.quantity แทน item.qty)
+  const subtotal = cartItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
   const discount = 0; // จำลองส่วนลด
   const deliveryFee = 0; // ฟรีค่าจัดส่ง
   const total = subtotal - discount + deliveryFee;
 
   return (
-    <div className="sticky top-24 bg-white rounded-xl p-6 shadow-lg">
+    <div className="sticky top-24 bg-[#262626] rounded-xl p-6 shadow-lg border border-gray-700 text-white">
       <h2 className="text-xl font-bold mb-4">สรุปคำสั่งซื้อ</h2>
       
       {/* Item List */}
       <div className="space-y-3 mb-6">
-        {cartItems.map(item => (
-          <div key={item.id} className="flex justify-between text-sm text-gray-300">
-            <span>{item.name} × {item.qty}</span>
-            <span>฿{item.price * item.qty}</span>
-          </div>
-        ))}
+        {cartItems.length === 0 ? (
+          <p className="text-sm text-gray-400">ไม่มีรายการอาหาร</p>
+        ) : (
+          cartItems.map(item => (
+            <div key={item.id} className="flex justify-between text-sm text-gray-300">
+              <span>{item.name} × {item.quantity}</span>
+              <span>฿{(item.price * item.quantity).toLocaleString()}</span>
+            </div>
+          ))
+        )}
       </div>
 
       {/* Promo Code Input */}
@@ -40,7 +44,7 @@ export default function OrderSummary({ cartItems }) {
       <div className="space-y-3 border-b border-gray-600 pb-4 mb-4 text-sm">
         <div className="flex justify-between">
           <span className="text-gray-400">ราคาอาหาร</span>
-          <span>฿{subtotal}</span>
+          <span>฿{subtotal.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">ค่าจัดส่ง</span>
@@ -54,7 +58,7 @@ export default function OrderSummary({ cartItems }) {
 
       <div className="flex justify-between font-bold text-lg mb-6">
         <span>ยอดรวม</span>
-        <span className="text-[#DC5F00]">฿{total}</span>
+        <span className="text-[#DC5F00]">฿{total.toLocaleString()}</span>
       </div>
 
       {/* Trust Badges */}
@@ -65,7 +69,7 @@ export default function OrderSummary({ cartItems }) {
       </div>
 
       <button className="w-full bg-[#DC5F00] hover:bg-[#c25400] text-white font-bold py-4 rounded-lg transition duration-300">
-        สั่งซื้อและชำระเงิน - ฿{total}
+        สั่งซื้อและชำระเงิน - ฿{total.toLocaleString()}
       </button>
 
       <p className="text-center text-xs text-gray-500 mt-4 flex items-center justify-center">
