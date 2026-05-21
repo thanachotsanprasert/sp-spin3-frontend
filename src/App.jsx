@@ -17,6 +17,12 @@ import Reserve from "./component/Reserve";
 // import DeliveryTracking from "./pages/customer/DeliveryTracking";
 import OrderTrackingPage from "./pages/customer/OrderTrackingPage";
 import ProtectedRoute from "./component/ProtectedRoute";
+
+// Rider Components
+import DriverDashboard from "./component/rider/DriverDashboard";
+import OrderDetail from "./component/rider/OrderDetail";
+import DeliveryHistory from "./component/rider/DeliveryHistory";
+
 // นำเข้า UserContext เพื่อให้ปุ่ม Dev ใช้คำสั่ง setMyUserInfo ได้
 import { UserContext } from "./context/userContext/UserContext";
 
@@ -61,6 +67,13 @@ const DevRoleSwitcher = () => {
       </button>
       <span className="opacity-30">|</span>
       <button
+        className="hover:text-[#e4002b] transition-colors font-bold"
+        onClick={() => setMyUserInfo({ role: "rider", name: "Dev Rider" })}
+      >
+        Rider
+      </button>
+      <span className="opacity-30">|</span>
+      <button
         className="text-red-400 hover:text-red-500 transition-colors font-bold"
         onClick={() => setMyUserInfo(null)}
       >
@@ -83,7 +96,7 @@ export default function App() {
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
+        
         {/* CUSTOMER ROUTES (ต้องล็อกอิน และเป็น Customer) */}
 
         <Route
@@ -94,6 +107,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/payment"
           element={
@@ -115,6 +129,32 @@ export default function App() {
           element={
             <ProtectedRoute allowedRoles={["customer"]}>
               <OrderTrackingPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* RIDER ROUTES */}
+        <Route
+          path="/driver"
+          element={
+            <ProtectedRoute allowedRoles={["rider"]}>
+              <DriverDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/driver/order/:orderId"
+          element={
+            <ProtectedRoute allowedRoles={["rider"]}>
+              <OrderDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/driver/history"
+          element={
+            <ProtectedRoute allowedRoles={["rider"]}>
+              <DeliveryHistory />
             </ProtectedRoute>
           }
         />

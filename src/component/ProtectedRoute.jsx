@@ -18,6 +18,8 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     return <Navigate to="/" replace />;
   }
 
+
+
   // 3. ถ้าล็อกอินแล้ว และ Role ถูกต้อง ให้แสดงผลหน้าจอตามปกติ
   return children;
 };
