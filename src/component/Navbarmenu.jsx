@@ -12,7 +12,7 @@ import {
 import Logo from "../assets/picture/Logo.png";
 import Slogan from "../assets/picture/slogan.png";
 
-// Import Context ตามโค้ดของเพื่อน
+// Import Context
 import { UserContext } from "../context/userContext/UserContext";
 import { useShop } from "../context/ShopProvider";
 
@@ -21,12 +21,36 @@ const Navbarmenu = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const navigate = useNavigate();
 
-  // ดึง Context ของเพื่อนมาใช้งาน
+  // ดึง Context มาใช้งาน
   const { myUserInfo, setMyUserInfo } = useContext(UserContext);
   const { cartCount, setIsCartOpen } = useShop();
 
+  // function คลิกพื้นที่ว่างปิด dropdown profile ได้
+  const profileRef = useRef(null);
+  
+  // 1. ดักจับการคลิกเม้าส์บนหน้าจอ
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // 2. ถ้าคลิกนอกกล่อง profileRef ให้ปิด Dropdown
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+    };
+
+    // 3. Event Listener ให้รอฟังการคลิก
+    document.addEventListener("mousedown", handleClickOutside);
+
+    // 4. คลีนอัพเมื่อออกจากหน้าเว็บ
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Rules of Hooks: Conditional return must come AFTER all hooks
+  if (myUserInfo?.role === "cook") return null;
+
   const handleLogout = () => {
-    // 1. ล้างข้อมูลใน Context (จะทำให้ useEffect ใน Provider ล้าง cookies ให้อัตโนมัติ)
+    // 1. ล้างข้อมูลใน Context
     setMyUserInfo(null);
 
     // 2. ปิด UI ต่างๆ
@@ -42,31 +66,11 @@ const Navbarmenu = () => {
     setIsProfileOpen(false);
     if (myUserInfo?.role === "cook") navigate("/cookBoard");
     else if (myUserInfo?.role === "cashier") navigate("/cashier/orders");
-    else if (myUserInfo?.role === "rider") navigate("/rider-dashboard");
-    else navigate("/menu"); // ลูกค้าไปหน้าเมนู
+    else if (myUserInfo?.role === "rider") navigate("/driver"); // Updated to match driver dashboard route
+    else navigate("/menu");
   };
 
   const isLoggedInUser = !!myUserInfo;
-
-  // function คลิกพื้นที่ว่างปิด deopdown profile ได้
-  const profileRef = useRef(null);
-  // 1. ดักจับการคลิกเม้าส์บนหน้าจอ
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      // 2. ถ้าคลิกนอกกล่อง profileRef ให้ปิด Dropdown
-      if (profileRef.current && !profileRef.current.contains(event.target)) {
-        setIsProfileOpen(false);
-      }
-    };
-
-    // 3. Event Listener ให้รอฟังการคลิก
-    document.addEventListener("mousedown", handleClickOutside);
-
-    // 4. คลีนอัพเมื่อออกจากหน้าเว็บ เพื่อไม่ให้กินเครื่อง
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   return (
     <header className="bg-primary text-neutral shadow-lg sticky top-0 z-100">
@@ -137,7 +141,7 @@ const Navbarmenu = () => {
               )}
             </Link>
 
-            {/* User Profile / Login Button (ผสม Logic เพื่อน) */}
+            {/* User Profile / Login Button */}
             {isLoggedInUser ? (
               <div className="relative" ref={profileRef}>
                 <button
@@ -150,7 +154,7 @@ const Navbarmenu = () => {
 
                 {/* Profile Dropdown */}
                 {isProfileOpen && (
-                  <div className="absolute right-0 mt-3 w-52 bg-white border-2 border-[#242424] rounded-xl py-2 flex flex-col font-['IBM_Plex_Sans_Thai'] overflow-hidden animate-in fade-in zoom-in duration-200">
+                  <div className="absolute right-0 mt-3 w-52 bg-white border-2 border-[#242424] rounded-xl py-2 flex flex-col font-['IBM_Plex_Sans_Thai'] overflow-hidden animate-in fade-in zoom-in duration-200 shadow-xl">
                     <div className="px-4 py-2 border-b-2 border-gray-100 mb-1">
                       <p className="text-[10px] text-gray-400 uppercase font-black">
                         Logged in as
@@ -169,17 +173,17 @@ const Navbarmenu = () => {
                     {myUserInfo?.role !== "customer" && (
                       <button
                         onClick={goToDashboard}
-                        className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 text-[#242424] font-bold"
+                        className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 text-[#242424] font-bold cursor-pointer"
                       >
                         <LayoutDashboard size={16} className="text-[#e4002b]" />{" "}
                         Dashboard
                       </button>
                     )}
 
-                    {/* ปุ่ม Edit Info ( */}
+                    {/* ปุ่ม Edit Info */}
                     <button
                       onClick={() => alert("Future Feature")}
-                      className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 text-[#242424]"
+                      className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 text-[#242424] cursor-pointer"
                     >
                       <Settings size={16} /> Edit Info
                     </button>
@@ -187,15 +191,15 @@ const Navbarmenu = () => {
                     {/* ปุ่ม Order History */}
                     <button
                       onClick={() => alert("Future Feature: Order History")}
-                      className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 text-[#242424]"
+                      className="flex items-center gap-2 px-4 py-2 text-left hover:bg-gray-100 text-[#242424] cursor-pointer"
                     >
                       <History size={16} /> Order History
                     </button>
 
-                    {/* ปุ่ม Sign Out (ให้อยู่ล่างสุด มีเส้นคั่นด้านบน) */}
+                    {/* ปุ่ม Sign Out */}
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-2 px-4 py-2 text-left hover:bg-[#e4002b] hover:text-white text-red-600 font-bold border-t-2 border-gray-100 mt-1"
+                      className="flex items-center gap-2 px-4 py-2 text-left hover:bg-[#e4002b] hover:text-white text-red-600 font-bold border-t-2 border-gray-100 mt-1 cursor-pointer"
                     >
                       <LogOut size={16} /> Sign Out
                     </button>
@@ -225,7 +229,7 @@ const Navbarmenu = () => {
           </Link>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="text-neutral"
+            className="text-neutral cursor-pointer"
           >
             <svg
               className="w-8 h-8"
@@ -270,7 +274,7 @@ const Navbarmenu = () => {
               <li>
                 <button
                   onClick={() => alert("Go to profile")}
-                  className="block text-left w-full hover:text-[#e4002b]"
+                  className="block text-left w-full hover:text-[#e4002b] cursor-pointer"
                 >
                   ACCOUNT
                 </button>
@@ -278,7 +282,7 @@ const Navbarmenu = () => {
               <li>
                 <button
                   onClick={handleLogout}
-                  className="block text-red-500 w-full text-left"
+                  className="block text-red-500 w-full text-left cursor-pointer"
                 >
                   SIGN OUT
                 </button>

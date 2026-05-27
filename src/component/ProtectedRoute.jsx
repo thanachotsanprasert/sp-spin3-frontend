@@ -14,11 +14,13 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
   // 2. ถ้าล็อกอินแล้ว เช็ค Role
   // (ถ้าเป็นโหมด Dev หรือมี Role dev ปล่อยผ่านได้เลย หรือจะใช้เช็คตาม Role ปกติ)
   if (allowedRoles && !allowedRoles.includes(myUserInfo.role)) {
+    // If user is a cook, always redirect to cookBoard
+    if (myUserInfo.role === "cook") {
+      return <Navigate to="/cookBoard" replace />;
+    }
     // ให้เตะกลับไปหน้า Index/Home
     return <Navigate to="/" replace />;
   }
-
-
 
   // 3. ถ้าล็อกอินแล้ว และ Role ถูกต้อง ให้แสดงผลหน้าจอตามปกติ
   return children;

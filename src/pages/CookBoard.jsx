@@ -1,17 +1,24 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { api } from "../utils/api";
+import { UserContext } from "../context/userContext/UserContext";
+import { LogOut, Clock, Utensils, CheckCircle, AlertCircle, RefreshCcw } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function CookBoard() {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState("cooking"); // 'all', 'cooking', 'finished'
   const [loading, setLoading] = useState(true);
+  const { setMyUserInfo } = useContext(UserContext);
+  const navigate = useNavigate();
 
   const fetchOrders = async () => {
     try {
       const data = await api.get("/orders");
-      setOrders(data);
+      // Ensure data is an array
+      setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to fetch orders:", err);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -23,17 +30,25 @@ export default function CookBoard() {
     return () => clearInterval(interval);
   }, []);
 
-  const getTableStatus = (orderList) => {
-    if (orderList.every(item => item.status === "finished" || item.status === "cancel")) {
+  const handleLogout = () => {
+    setMyUserInfo(null);
+    navigate("/login");
+  };
+
+  const getTableStatus = (orderList = []) => {
+    if (!Array.isArray(orderList) || orderList.length === 0) return "inkitchen";
+    
+    if (orderList.every(item => item && (item.status === "finished" || item.status === "cancel"))) {
       return "finished";
     }
-    if (orderList.some(item => item.status === "Cook")) {
+    if (orderList.some(item => item && item.status === "Cook")) {
       return "cooking";
     }
     return "inkitchen";
   };
 
   const filteredOrders = orders.filter((order) => {
+    if (!order) return false;
     const status = getTableStatus(order.orderList);
     if (filter === "all") return true;
     if (filter === "cooking") return status === "cooking" || status === "inkitchen";
@@ -43,10 +58,10 @@ export default function CookBoard() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "finished": return "bg-green-100 border-green-500";
-      case "cooking": return "bg-red-100 border-red-500";
-      case "inkitchen": return "bg-blue-100 border-blue-500";
-      default: return "bg-gray-100 border-gray-500";
+      case "finished": return "border-green-500 bg-green-50/50";
+      case "cooking": return "border-orange-500 bg-orange-50/50";
+      case "inkitchen": return "border-blue-500 bg-blue-50/50";
+      default: return "border-gray-500 bg-gray-50/50";
     }
   };
 
@@ -60,115 +75,157 @@ export default function CookBoard() {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Kitchen Display System</h1>
-        <div className="flex gap-2">
-          {["all", "cooking", "finished"].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-full capitalize font-medium transition ${
-                filter === f 
-                ? "bg-blue-600 text-white shadow-md" 
-                : "bg-white text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              {f === "cooking" ? "In Cooking" : f}
-            </button>
-          ))}
+    <div className="p-8 bg-[#f8fafc] min-h-screen font-['IBM_Plex_Sans_Thai']">
+      {/* Header Area */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <div className="flex items-center gap-4">
+          <div className="bg-[#e4002b] p-3 rounded-xl text-white shadow-lg shadow-red-100">
+            <Utensils size={32} />
+          </div>
+          <div>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight">KITCHEN DISPLAY</h1>
+            <p className="text-slate-500 font-medium">Real-time Order Management</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex bg-slate-100 p-1.5 rounded-xl border border-slate-200">
+            {["all", "cooking", "finished"].map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`px-6 py-2.5 rounded-lg capitalize font-bold text-lg transition-all duration-200 ${
+                  filter === f 
+                  ? "bg-white text-[#e4002b] shadow-sm scale-105" 
+                  : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                {f === "cooking" ? "In Preparation" : f}
+              </button>
+            ))}
+          </div>
+          
+          <button 
+            onClick={handleLogout}
+            className="flex items-center gap-2 bg-slate-900 text-white px-6 py-3 rounded-xl font-bold hover:bg-[#e4002b] transition-all shadow-lg shadow-slate-200"
+          >
+            <LogOut size={20} />
+            <span>EXIT</span>
+          </button>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="flex flex-col justify-center items-center h-96 gap-4">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-slate-200 border-t-[#e4002b]"></div>
+          <p className="text-slate-400 font-bold animate-pulse">SYNCING ORDERS...</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8">
           {filteredOrders.map((order) => {
+            if (!order || !Array.isArray(order.orderList)) return null;
             const tableStatus = getTableStatus(order.orderList);
             return (
               <div 
                 key={order._id} 
-                className={`flex flex-col border-t-4 rounded-lg shadow-lg overflow-hidden transition-all hover:scale-105 bg-white ${getStatusColor(tableStatus)}`}
+                className={`flex flex-col border-2 rounded-2xl shadow-xl shadow-slate-200/50 overflow-hidden transition-all duration-300 hover:translate-y-[-4px] bg-white ${getStatusColor(tableStatus)}`}
               >
-                <div className="p-4 border-b bg-opacity-10 bg-black flex justify-between items-start">
+                {/* Card Header */}
+                <div className="p-5 border-b-2 border-slate-100 flex justify-between items-start bg-white/80 backdrop-blur-sm">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-800">
-                      {order.type === "Onsite" ? order.customer.name : `Delivery: ${order.customer.name}`}
+                    <h2 className="text-2xl font-black text-slate-900 leading-tight">
+                      {order.type === "Onsite" ? (order.customer?.name || "Guest") : `🚚 ${order.customer?.name || "Customer"}`}
                     </h2>
-                    <p className="text-xs text-gray-500">Order ID: {order._id.substring(order._id.length - 6)}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-sm font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded">#{order._id.substring(order._id.length - 6).toUpperCase()}</span>
+                      <span className="text-sm text-slate-400 font-medium">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
                   </div>
-                  <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${
-                    tableStatus === 'cooking' ? 'bg-red-500 text-white' : 
+                  <div className={`px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-widest shadow-sm ${
+                    tableStatus === 'cooking' ? 'bg-orange-500 text-white' : 
                     tableStatus === 'finished' ? 'bg-green-500 text-white' : 'bg-blue-500 text-white'
                   }`}>
-                    {tableStatus}
-                  </span>
+                    {tableStatus === 'inkitchen' ? 'NEW' : tableStatus}
+                  </div>
                 </div>
                 
-                <div className="flex-1 p-4 space-y-3 overflow-y-auto max-h-[400px]">
-                  {order.orderList.map((item) => (
-                    <div key={item._id} className="flex justify-between items-center p-2 rounded bg-white bg-opacity-50 border border-gray-200">
-                      <div className="flex-1">
-                        <div className="flex justify-between">
-                          <span className="font-semibold text-gray-800">{item.name} x{item.quantity}</span>
-                          <span className={`text-xs font-bold ${
-                            item.status === 'Cook' ? 'text-red-600' : 
-                            item.status === 'finished' ? 'text-green-600' : 'text-blue-600'
+                {/* Items List */}
+                <div className="flex-1 p-5 space-y-4 overflow-y-auto max-h-[500px]">
+                  {order.orderList.map((item) => {
+                    if (!item) return null;
+                    return (
+                      <div key={item._id} className="flex flex-col p-4 rounded-xl bg-white border-2 border-slate-100 shadow-sm transition-colors hover:border-slate-200">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex flex-col">
+                            <span className="text-xl font-black text-slate-800 leading-tight">{item.name}</span>
+                            <span className="text-2xl font-black text-[#e4002b]">x{item.quantity}</span>
+                          </div>
+                          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-sm font-black ${
+                            item.status === 'Cook' ? 'bg-orange-100 text-orange-600' : 
+                            item.status === 'finished' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
                           }`}>
-                            {item.status}
-                          </span>
+                            {item.status === 'Cook' && <Utensils size={14} />}
+                            {item.status === 'finished' && <CheckCircle size={14} />}
+                            {item.status === 'InKitchen' && <Clock size={14} />}
+                            {(item.status || "UNKNOWN").toUpperCase()}
+                          </div>
                         </div>
-                        <div className="flex gap-2 mt-2">
+                        
+                        <div className="flex gap-2">
                           {item.status === 'InKitchen' && (
                             <button 
                               onClick={() => handleUpdateStatus(order._id, item._id, 'Cook')}
-                              className="text-[10px] bg-orange-500 text-white px-2 py-1 rounded hover:bg-orange-600"
+                              className="flex-1 flex items-center justify-center gap-2 bg-orange-500 text-white py-3 rounded-xl font-black text-sm hover:bg-orange-600 transition-colors shadow-lg shadow-orange-100"
                             >
-                              Start Cooking
+                              <Utensils size={16} /> START
                             </button>
                           )}
                           {item.status === 'Cook' && (
                             <button 
                               onClick={() => handleUpdateStatus(order._id, item._id, 'finished')}
-                              className="text-[10px] bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                              className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-3 rounded-xl font-black text-sm hover:bg-green-600 transition-colors shadow-lg shadow-green-100"
                             >
-                              Finish
+                              <CheckCircle size={16} /> DONE
                             </button>
                           )}
-                          {item.status !== 'finished' && item.status !== 'cancel' && (
-                            <button 
-                              onClick={() => handleUpdateStatus(order._id, item._id, 'cancel')}
-                              className="text-[10px] bg-gray-400 text-white px-2 py-1 rounded hover:bg-gray-500"
-                            >
-                              Cancel
-                            </button>
-                          )}
-                          {item.status === 'finished' && (
-                            <button 
-                              onClick={() => handleUpdateStatus(order._id, item._id, 'InKitchen')}
-                              className="text-[10px] bg-blue-400 text-white px-2 py-1 rounded hover:bg-blue-500"
-                            >
-                              Redo
-                            </button>
-                          )}
+                          
+                          <div className="flex gap-2">
+                            {item.status !== 'finished' && item.status !== 'cancel' && (
+                              <button 
+                                onClick={() => handleUpdateStatus(order._id, item._id, 'cancel')}
+                                className="w-12 flex items-center justify-center bg-slate-100 text-slate-400 py-3 rounded-xl hover:bg-red-50 hover:text-red-500 transition-colors"
+                                title="Cancel Item"
+                              >
+                                <AlertCircle size={18} />
+                              </button>
+                            )}
+                            {item.status === 'finished' && (
+                              <button 
+                                onClick={() => handleUpdateStatus(order._id, item._id, 'InKitchen')}
+                                className="flex-1 flex items-center justify-center gap-2 bg-slate-100 text-slate-500 py-3 rounded-xl font-black text-sm hover:bg-slate-200 transition-colors"
+                              >
+                                <RefreshCcw size={16} /> REDO
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 
-                {order.customer.note && (
-                  <div className="p-3 bg-yellow-50 text-xs text-yellow-800 italic border-t border-yellow-100">
-                    Note: {order.customer.note}
+                {/* Footer Notes */}
+                {order.customer?.note && (
+                  <div className="p-4 bg-yellow-50/80 border-t-2 border-yellow-100">
+                    <div className="flex gap-2 items-start">
+                      <AlertCircle size={16} className="text-yellow-600 mt-0.5" />
+                      <div>
+                        <p className="text-[10px] font-black text-yellow-600 uppercase tracking-tighter">Kitchen Note</p>
+                        <p className="text-sm font-bold text-yellow-800 leading-tight">{order.customer.note}</p>
+                      </div>
+                    </div>
                   </div>
                 )}
-                
-                <div className="p-2 bg-gray-50 text-[10px] text-gray-400 text-center border-t">
-                  Ordered: {new Date(order.createdAt).toLocaleTimeString()}
-                </div>
               </div>
             );
           })}
@@ -176,9 +233,12 @@ export default function CookBoard() {
       )}
       
       {filteredOrders.length === 0 && !loading && (
-        <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-          <span className="text-5xl mb-4">🍳</span>
-          <p className="text-xl">No orders in this category</p>
+        <div className="flex flex-col items-center justify-center h-96 text-slate-300">
+          <div className="bg-white p-10 rounded-full shadow-inner mb-6">
+            <Utensils size={80} strokeWidth={1} />
+          </div>
+          <p className="text-2xl font-black tracking-tight">NO ORDERS IN QUEUE</p>
+          <p className="font-medium">Everything is currently up to date!</p>
         </div>
       )}
     </div>
