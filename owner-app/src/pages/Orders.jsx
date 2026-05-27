@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react'
 import { Search, Plus, Filter, ArrowUpDown, ChevronDown } from 'lucide-react'
-import { useOrders } from '../hooks/useOrders'
+import { useStoreData } from '../context/StoreDataContext'
 import OrderRow from '../components/orders/OrderRow'
 
 export default function Orders() {
-  const { orders, isLoading, updateStatus } = useOrders();
+  const { orders: ordersStore } = useStoreData();
+  const { orders, isLoading, updateStatus } = ordersStore;
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [typeFilter, setOrderTypeFilter] = useState('All');

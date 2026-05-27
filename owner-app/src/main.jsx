@@ -6,6 +6,7 @@ import "./index.css"
 import { AuthStoreProvider } from "./context/AuthContext"
 import { UIProvider } from "./context/UIContext"
 import { NotificationProvider } from "./context/NotificationContext"
+import { StoreDataProvider } from "./context/StoreDataContext"
 import Layout from "./components/layout/Layout"
 import Dashboard from "./pages/Dashboard"
 import Tables from "./pages/Tables"
@@ -24,7 +25,9 @@ const router = createBrowserRouter([
       <AuthStoreProvider>
         <NotificationProvider>
           <UIProvider>
-            <Layout />
+            <StoreDataProvider>
+              <Layout />
+            </StoreDataProvider>
           </UIProvider>
         </NotificationProvider>
       </AuthStoreProvider>

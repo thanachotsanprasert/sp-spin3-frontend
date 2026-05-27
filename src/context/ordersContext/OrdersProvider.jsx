@@ -1,23 +1,35 @@
 // เก็บข้อมูลตะกร้าสินค้า/ออเดอร์
-import { useState, useCallback } from "react";
-import { orders } from "../../assets/order";
+import { useState, useCallback, useContext, useEffect } from "react";
+import { orders as initialMockOrders } from "../../assets/order";
 import { OrdersContext } from "./OrdersContext";
 import { orderService } from "../../services/orderService";
+import { ShopContext } from "../ShopProvider";
 
 export const OrdersProvider = ({ children }) => {
-  // Normalize initial data for compatibility across different components
-  const normalizedOrders = orders.map((o) => ({
-    ...o,
-    id: o.id || o.orderId,
-    orderId: o.orderId || o.id,
-    orderList: o.orderList || o.List,
-    List: o.List || o.orderList,
-  }));
+  const { cart } = useContext(ShopContext);
 
-  const [orderList, setOrderList] = useState(normalizedOrders);
+  const [orderList, setOrderList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentOrder, setCurrentOrder] = useState(null);
+
+  // Sync with ShopContext cart
+  useEffect(() => {
+    if (cart && cart.length > 0) {
+      // Create a single active order from cart items
+      const activeOrder = {
+        orderId: "current-cart",
+        orderList: cart.map(item => ({
+          ...item,
+          quantity: item.qty, // Map qty to quantity
+          id: item.id
+        }))
+      };
+      setOrderList([activeOrder]);
+    } else {
+      setOrderList([]);
+    }
+  }, [cart]);
 
   // Update single order in list
   const updateOrder = useCallback((orderId, updates) => {

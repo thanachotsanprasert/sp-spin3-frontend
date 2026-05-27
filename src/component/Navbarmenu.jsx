@@ -14,6 +14,7 @@ import Slogan from "../assets/picture/slogan.png";
 
 // Import Context ตามโค้ดของเพื่อน
 import { UserContext } from "../context/userContext/UserContext";
+import { useShop } from "../context/ShopProvider";
 
 const Navbarmenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,26 +23,7 @@ const Navbarmenu = () => {
 
   // ดึง Context ของเพื่อนมาใช้งาน
   const { myUserInfo, setMyUserInfo } = useContext(UserContext);
-
-  const [cartCount, setCartCount] = useState(0);
-
-  // Sync cart count from localStorage
-  useEffect(() => {
-    const updateCartCount = () => {
-      const savedCart = localStorage.getItem("crispyCart");
-      if (savedCart) {
-        const cartItems = JSON.parse(savedCart);
-        const count = cartItems.reduce((sum, item) => sum + item.qty, 0);
-        setCartCount(count);
-      } else {
-        setCartCount(0);
-      }
-    };
-
-    updateCartCount();
-    const interval = setInterval(updateCartCount, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  const { cartCount, setIsCartOpen } = useShop();
 
   const handleLogout = () => {
     // 1. ล้างข้อมูลใน Context (จะทำให้ useEffect ใน Provider ล้าง cookies ให้อัตโนมัติ)

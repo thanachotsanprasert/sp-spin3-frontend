@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react'
 import { Search, Plus, LayoutGrid, List } from 'lucide-react'
-import { useMenu } from '../hooks/useMenu'
+import { useStoreData } from '../context/StoreDataContext'
 import MenuCard from '../components/menu/MenuCard'
 import { formatTHB } from '../utils/format'
 
 export default function Menu() {
-  const { menu, isLoading, toggleAvailability } = useMenu();
+  const { menu: menuStore } = useStoreData();
+  const { menu, isLoading, toggleAvailability } = menuStore;
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [viewType, setViewType] = useState('grid');
