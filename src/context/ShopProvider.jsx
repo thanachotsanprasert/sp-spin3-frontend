@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { MENU } from "../assets/menuData";
 
 export const ShopContext = createContext();
 
@@ -42,13 +43,30 @@ export const ShopProvider = ({ children }) => {
 
   const addToCart = (id, qty = 1) => {
     setCart((prev) => {
+      const menuItem = MENU.find((m) => m.id === id);
+      if (!menuItem) {
+        console.warn(`Menu item with id ${id} not found`);
+        return prev;
+      }
+
       const existing = prev.find((item) => item.id === id);
       if (existing) {
         return prev.map((item) =>
           item.id === id ? { ...item, qty: item.qty + qty } : item
         );
       }
-      return [...prev, { id, qty }];
+      
+      // Store full menu item data with qty
+      return [
+        ...prev,
+        {
+          id,
+          name: menuItem.name,
+          price: menuItem.price,
+          img: menuItem.img,
+          qty,
+        },
+      ];
     });
   };
 

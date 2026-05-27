@@ -4,7 +4,6 @@ import React, { useState, useContext } from "react";
 import { UserContext } from "../../context/userContext/UserContext";
 import { X, Minus, Plus, ShoppingBag, MapPin, AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom"; // นำเข้า useNavigate เพื่อเปลี่ยนหน้า
-import { MENU } from "../../assets/menuData";
 
 export default function CartSidebar({
   isOpen,
@@ -26,8 +25,7 @@ export default function CartSidebar({
 
   // คำนวณราคารวม
   const subTotal = cartItems.reduce((sum, item) => {
-    const menuData = MENU.find((m) => m.id === item.id);
-    return sum + (menuData ? menuData.price * item.qty : 0);
+    return sum + ((item.price || 0) * item.qty);
   }, 0);
 
   // สมมติว่ายังไม่มีค่าส่ง หรือโปรโมชั่น (คำนวณง่ายๆ ไปก่อน)
@@ -92,28 +90,27 @@ export default function CartSidebar({
           ) : (
             // กรณีมีสินค้า
             cartItems.map((cartItem) => {
-              const itemData = MENU.find((m) => m.id === cartItem.id);
-              if (!itemData) return null;
-
               return (
                 <div
                   key={cartItem.id}
                   className="flex gap-4 bg-white p-4 rounded-2xl border-2 border-[#242424]"
                 >
                   {/* รูปสินค้า (เล็กๆ) */}
-                  <img
-                    src={itemData.img}
-                    alt={itemData.name}
-                    className="w-20 h-20 object-contain bg-[#f0f0f0] rounded-xl"
-                  />
+                  {cartItem.img && (
+                    <img
+                      src={cartItem.img}
+                      alt={cartItem.name}
+                      className="w-20 h-20 object-contain bg-[#f0f0f0] rounded-xl"
+                    />
+                  )}
 
                   <div className="flex-1 flex flex-col justify-between">
                     <div>
                       <h3 className="font-bold text-[#242424] leading-tight mb-1">
-                        {itemData.name}
+                        {cartItem.name}
                       </h3>
                       <p className="font-['Bebas_Neue'] text-[#e4002b] text-xl tracking-wide">
-                        ฿{itemData.price}
+                        ฿{cartItem.price}
                       </p>
                     </div>
 

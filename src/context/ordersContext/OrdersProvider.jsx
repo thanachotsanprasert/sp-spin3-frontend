@@ -21,7 +21,7 @@ export const OrdersProvider = ({ children }) => {
         orderId: "current-cart",
         orderList: cart.map(item => ({
           ...item,
-          quantity: item.qty, // Map qty to quantity
+          quantity: item.qty, // Map qty to quantity for consistency
           id: item.id
         }))
       };

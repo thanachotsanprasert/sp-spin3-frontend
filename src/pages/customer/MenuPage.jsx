@@ -118,8 +118,7 @@ const MenuPage = () => {
     activeTab === "all" ? MENU : MENU.filter((m) => m.cat === activeTab);
   
   const totalPrice = cart.reduce((sum, item) => {
-    const menuData = MENU.find((m) => m.id === item.id);
-    return sum + (menuData ? menuData.price * item.qty : 0);
+    return sum + ((item.price || 0) * item.qty);
   }, 0);
 
   return (

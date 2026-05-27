@@ -17,9 +17,10 @@ export default function OrderSummary({ cartItems, bookingData }) {
 
   // คำนวณยอดเงินรวม (ใช้ item.quantity แทน item.qty)
   const subtotal = cartItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+  const tax = subtotal * 0.07; // 7% VAT
   const discount = 0; // จำลองส่วนลด
   const deliveryFee = 0; // ฟรีค่าจัดส่ง
-  const total = subtotal - discount + deliveryFee;
+  const total = subtotal + tax - discount + deliveryFee;
 
   const handleOrderAndPay = async () => {
     if (cartItems.length === 0) {
@@ -113,6 +114,10 @@ export default function OrderSummary({ cartItems, bookingData }) {
         <div className="flex justify-between">
           <span className="text-gray-400">ราคาอาหาร</span>
           <span>฿{subtotal.toLocaleString()}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-400">ภาษี (7%)</span>
+          <span>฿{tax.toLocaleString()}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-gray-400">ค่าจัดส่ง</span>
