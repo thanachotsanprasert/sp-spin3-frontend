@@ -26,14 +26,14 @@ import DeliveryHistory from "./component/rider/DeliveryHistory";
 // นำเข้า UserContext
 import { UserContext } from "./context/userContext/UserContext";
 
-// Component for global Cook redirection on public routes
-const GlobalCookGuard = () => {
+// Component for global redirection on public routes
+const GlobalGuard = () => {
   const { myUserInfo } = useContext(UserContext);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
-    // List of public paths where we still want to redirect cooks
+    // List of public paths where we still want to redirect users based on their role
     const publicPaths = ["/", "/home", "/menu", "/login", "/register"];
     if (myUserInfo?.role === "cook" && publicPaths.includes(location.pathname)) {
       navigate("/cookBoard", { replace: true });
@@ -99,7 +99,7 @@ const DevRoleSwitcher = () => {
 export default function App() {
   return (
     <Router>
-      <GlobalCookGuard />
+      <GlobalGuard />
       <Navbarmenu />
       <DevRoleSwitcher />
 

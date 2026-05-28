@@ -47,7 +47,7 @@ const Navbarmenu = () => {
   }, []);
 
   // Rules of Hooks: Conditional return must come AFTER all hooks
-  if (myUserInfo?.role === "cook") return null;
+  if (myUserInfo?.role === "cook"||myUserInfo?.role === "rider") return null;
 
   const handleLogout = () => {
     // 1. ล้างข้อมูลใน Context
