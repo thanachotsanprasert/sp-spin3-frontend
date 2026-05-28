@@ -10,9 +10,10 @@ import {
 } from "lucide-react";
 import MenuCard from "../../component/customer/MenuCard";
 import CartSidebar from "../../component/customer/CartSidebar";
-import LoginModal from "../../component/LoginModal"; // ✅ นำเข้า LoginModal
 import { OrdersContext } from "../../context/ordersContext/OrdersContext";
 import ProductModal from "../../component/customer/ProductModal";
+import LoginModal from "../../component/LoginModal";
+import { useShop } from "../../context/ShopProvider";
 import {
   PROMOTIONS,
   MENU,
@@ -23,32 +24,29 @@ import {
 const MenuPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { orderList, setOrderList } = useContext(OrdersContext);
+  const {
+    cart,
+    cartCount,
+    addToCart: shopAddToCart,
+    updateCartQty,
+    isCartOpen,
+    setIsCartOpen,
+    isLoginModalOpen,
+    setIsLoginModalOpen,
+    toastMsg,
+    showToast,
+    selectedBranch,
+    selectBranch,
+  } = useShop();
 
-  // --- States ---
+  // --- Local UI States ---
   const [activeTab, setActiveTab] = useState("all");
-  const [cart, setCart] = useState(() => {
-    const savedCart = localStorage.getItem("crispyCart");
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
-
-  const [isCartOpen, setIsCartOpen] = useState(
-    searchParams.get("cart") === "open",
-  );
-
-  // ✅ เพิ่ม State สำหรับควบคุมการเปิด/ปิด Login Modal
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-
-  const [toastMsg, setToastMsg] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedItem, setSelectedItem] = useState(null);
-
-  // Modal สาขา
-  const [selectedBranch, setSelectedBranch] = useState(() =>
-    localStorage.getItem("selectedBranch"),
-  );
   const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+
+  const totalItems = cartCount;
 
   // เช็ค URL เมื่อมีการเปลี่ยนแปลง
   useEffect(() => {
@@ -60,11 +58,7 @@ const MenuPage = () => {
       searchParams.delete("cart");
       setSearchParams(searchParams, { replace: true });
     }
-  }, [searchParams, setSearchParams]);
-
-  useEffect(() => {
-    localStorage.setItem("crispyCart", JSON.stringify(cart));
-  }, [cart]);
+  }, [searchParams, setSearchParams, setIsCartOpen]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -80,8 +74,7 @@ const MenuPage = () => {
   };
 
   const handleSelectBranch = (branchId) => {
-    setSelectedBranch(branchId);
-    localStorage.setItem("selectedBranch", branchId);
+    selectBranch(branchId);
     setIsBranchModalOpen(false);
 
     if (pendingAction) {
@@ -99,9 +92,7 @@ const MenuPage = () => {
   };
 
   const checkBranchBeforeAction = (type, item, qty = 1) => {
-    const currentBranch = localStorage.getItem("selectedBranch");
-
-    if (!currentBranch) {
+    if (!selectedBranch) {
       setPendingAction({ type, item, qty });
       setIsBranchModalOpen(true);
     } else {
@@ -115,69 +106,19 @@ const MenuPage = () => {
 
   // ฟังก์ชันใส่ตะกร้า
   const executeAddToCart = (id, name, qty = 1) => {
-    const fullMenuItem = MENU.find((m) => m.id === id);
-
-    setCart((prev) => {
-      const existing = prev.find((item) => item.id === id);
-      if (existing) {
-        return prev.map((item) =>
-          item.id === id ? { ...item, qty: item.qty + qty } : item,
-        );
-      }
-      return [...prev, { id, qty }];
-    });
-
-    setOrderList((prevOrders) => {
-      let currentOrder =
-        prevOrders.length > 0
-          ? { ...prevOrders[0] }
-          : { orderId: Date.now().toString(), orderList: [] };
-      let listKey = currentOrder.List ? "List" : "orderList";
-      let currentItems = currentOrder[listKey] || [];
-
-      const existingItemIndex = currentItems.findIndex(
-        (item) => item.id === id,
-      );
-
-      if (existingItemIndex >= 0) {
-        currentItems[existingItemIndex].quantity += qty;
-      } else {
-        currentItems.push({
-          id: id,
-          name: name,
-          price: fullMenuItem ? fullMenuItem.price : 0,
-          emoji: fullMenuItem ? fullMenuItem.emoji : "🍗",
-          quantity: qty,
-          note: "None",
-          size: "Regular",
-        });
-      }
-
-      currentOrder[listKey] = currentItems;
-      return [currentOrder];
-    });
-
-    setToastMsg(`Added: ${name}`);
-    setTimeout(() => setToastMsg(""), TOAST_DURATION_MS);
+    shopAddToCart(id, qty);
+    showToast(`Added: ${name}`);
   };
 
   const handleUpdateQty = (id, delta) => {
-    setCart((prev) =>
-      prev
-        .map((item) => {
-          if (item.id === id) return { ...item, qty: item.qty + delta };
-          return item;
-        })
-        .filter((item) => item.qty > 0),
-    );
+    updateCartQty(id, delta);
   };
 
   const filteredMenu =
     activeTab === "all" ? MENU : MENU.filter((m) => m.cat === activeTab);
-  const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+  
   const totalPrice = cart.reduce((sum, item) => {
-    const menuData = MENU.find((m) => m.id === item.id);
-    return sum + (menuData ? menuData.price * item.qty : 0);
+    return sum + ((item.price || 0) * item.qty);
   }, 0);
 
   return (

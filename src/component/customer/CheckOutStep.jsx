@@ -1,16 +1,12 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import { OrdersContext } from "../../context/ordersContext/OrdersContext";
-import { useLocation } from "react-router-dom"; // 1. ดึงข้อมูลที่ข้ามหน้ามา
+import { PaymentContext } from "../../context/paymentContext";
 
-export default function CheckoutSteps() {
+export default function CheckoutSteps({ bookingData }) {
   const { orderList } = useContext(OrdersContext);
-  const location = useLocation();
+  const { paymentState, setPaymentMethod: setPaymentMethodContext } = useContext(PaymentContext);
 
-  // 2. ดึงวันที่มาจาก BookingPage ถ้าไม่มีให้ใช้วันที่ปัจจุบัน
-  const bookingDate =
-    location.state?.bookingDate || new Date().toISOString().split("T")[0];
-
-  // 3. แปลงข้อมูลที่อยู่ให้เป็น State แบบ Array เพื่อให้เพิ่ม/แก้ไขได้
+  // Address management
   const [addresses, setAddresses] = useState([
     {
       id: "home",
@@ -32,9 +28,10 @@ export default function CheckoutSteps() {
 
   const [selectedAddress, setSelectedAddress] = useState("home");
   const [selectedTime, setSelectedTime] = useState("fastest");
-  const [paymentMethod, setPaymentMethod] = useState("credit");
 
-  // State สำหรับฟอร์มเพิ่มที่อยู่
+  const paymentMethod = paymentState.selectedPaymentMethod || "บัตรเครดิต";
+
+  // Add address form state
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [newAddress, setNewAddress] = useState({
     type: "อื่นๆ",
@@ -52,25 +49,30 @@ export default function CheckoutSteps() {
     { id: "1500", label: "15:00 - 15:30" },
   ];
 
-  // ฟังก์ชันบันทึกที่อยู่ใหม่
-  const handleSaveAddress = () => {
+  // Save new address
+  const handleSaveAddress = useCallback(() => {
     if (!newAddress.name || !newAddress.detail || !newAddress.phone) {
       alert("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
     const newId = "addr_" + Date.now();
-    setAddresses([
-      ...addresses,
+    setAddresses((prev) => [
+      ...prev,
       {
         id: newId,
         ...newAddress,
-        labelBg: "bg-gray-200 text-gray-800", // สีป้ายกำกับเริ่มต้น
+        labelBg: "bg-gray-200 text-gray-800",
       },
     ]);
-    setSelectedAddress(newId); // เลือกที่อยู่ที่เพิ่งเพิ่มอัตโนมัติ
-    setIsAddingAddress(false); // ปิดฟอร์ม
-    setNewAddress({ type: "อื่นๆ", name: "", detail: "", phone: "" }); // ล้างฟอร์ม
-  };
+    setSelectedAddress(newId);
+    setIsAddingAddress(false);
+    setNewAddress({ type: "อื่นๆ", name: "", detail: "", phone: "" });
+  }, [newAddress]);
+
+  // Update payment method in context
+  const handlePaymentMethodChange = useCallback((method) => {
+    setPaymentMethodContext(method);
+  }, [setPaymentMethodContext]);
 
   return (
     <div className="space-y-6">
@@ -104,7 +106,7 @@ export default function CheckoutSteps() {
                     >
                       <div className="flex items-center space-x-4">
                         <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl text-black">
-                          🍔
+                          {item.emoji || "🍔"}
                         </div>
                         <div>
                           <h3 className="font-bold">{item.name}</h3>
@@ -144,7 +146,6 @@ export default function CheckoutSteps() {
         </h2>
 
         <div className="space-y-3">
-          {/* ลูปแสดงที่อยู่ทั้งหมดจาก State */}
           {addresses.map((addr) => (
             <label
               key={addr.id}
@@ -181,7 +182,6 @@ export default function CheckoutSteps() {
           ))}
         </div>
 
-        {/* ฟอร์มเพิ่มที่อยู่ใหม่ (ซ่อน/แสดง) */}
         {isAddingAddress ? (
           <div className="mt-4 bg-[#1a1a1a] p-4 rounded-lg border border-gray-600 space-y-3">
             <input
@@ -235,7 +235,7 @@ export default function CheckoutSteps() {
         )}
       </div>
 
-      {/* Step 3: เวลาจัดส่ง (ดึง Date มาโชว์) */}
+      {/* Step 3: เวลาจัดส่ง */}
       <div className="bg-[#262626] rounded-xl p-6 border border-gray-700 text-white">
         <h2 className="text-xl font-bold mb-4 flex items-center justify-between">
           <div className="flex items-center">
@@ -246,7 +246,7 @@ export default function CheckoutSteps() {
           </div>
           <div className="text-sm font-normal text-gray-400 bg-[#333] px-3 py-1 rounded-full">
             วันที่:{" "}
-            <span className="text-orange-400 font-bold">{bookingDate}</span>
+            <span className="text-orange-400 font-bold">{bookingData?.bookingDate || "2024-05-27"}</span>
           </div>
         </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -267,7 +267,6 @@ export default function CheckoutSteps() {
       </div>
 
       {/* Step 4: วิธีชำระเงิน */}
-
       <div className="bg-[#262626] rounded-xl p-6 border border-gray-700 text-white">
         <h2 className="text-xl font-bold mb-4 flex items-center">
           <span className="bg-[#DC5F00] text-white w-6 h-6 rounded-full flex items-center justify-center text-sm mr-3">
@@ -281,7 +280,7 @@ export default function CheckoutSteps() {
             (method, idx) => (
               <button
                 key={idx}
-                onClick={() => setPaymentMethod(method)}
+                onClick={() => handlePaymentMethodChange(method)}
                 className={`px-4 py-2 whitespace-nowrap text-sm ${paymentMethod === method ? "text-[#DC5F00] border-b-2 border-[#DC5F00] font-bold" : "text-gray-400 hover:text-white"}`}
               >
                 {method}
@@ -290,14 +289,11 @@ export default function CheckoutSteps() {
           )}
         </div>
 
-        {/* Credit Card Mockup Form (แสดงเฉพาะเมื่อเลือกบัตรเครดิต) */}
-
         {paymentMethod === "บัตรเครดิต" && (
           <>
             <div className="bg-[#E9662A] rounded-xl p-6 text-white w-full max-w-sm mb-6 shadow-lg">
               <div className="flex justify-between items-center mb-6">
                 <div className="w-12 h-8 bg-white/30 rounded"></div>
-
                 <div className="font-bold italic">VISA</div>
               </div>
 
@@ -308,13 +304,11 @@ export default function CheckoutSteps() {
               <div className="flex justify-between text-xs">
                 <div>
                   <p className="opacity-70">ชื่อบนบัตร</p>
-
                   <p className="font-bold text-sm">YOUR NAME</p>
                 </div>
 
                 <div>
                   <p className="opacity-70">หมดอายุ</p>
-
                   <p className="font-bold text-sm">MM/YY</p>
                 </div>
               </div>
@@ -325,7 +319,6 @@ export default function CheckoutSteps() {
                 <label className="block text-sm text-gray-400 mb-1">
                   หมายเลขบัตร
                 </label>
-
                 <input
                   type="text"
                   placeholder="0000 0000 0000 0000"
@@ -337,7 +330,6 @@ export default function CheckoutSteps() {
                 <label className="block text-sm text-gray-400 mb-1">
                   ชื่อผู้ถือบัตร
                 </label>
-
                 <input
                   type="text"
                   placeholder="ชื่อ นามสกุล (ภาษาอังกฤษ)"
@@ -350,7 +342,6 @@ export default function CheckoutSteps() {
                   <label className="block text-sm text-gray-400 mb-1">
                     วันหมดอายุ
                   </label>
-
                   <input
                     type="text"
                     placeholder="MM/YY"
@@ -362,7 +353,6 @@ export default function CheckoutSteps() {
                   <label className="block text-sm text-gray-400 mb-1">
                     CVV
                   </label>
-
                   <input
                     type="password"
                     placeholder="***"
@@ -373,7 +363,6 @@ export default function CheckoutSteps() {
 
               <label className="flex items-center space-x-2 cursor-pointer mt-4">
                 <input type="checkbox" className="accent-[#DC5F00]" />
-
                 <span className="text-sm text-gray-300">
                   บันทึกบัตรสำหรับครั้งถัดไป
                 </span>

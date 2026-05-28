@@ -1,29 +1,35 @@
-// จำลองการเรียก API ขึ้นมาคั่นกลาง เวลาย้ายไปใช้ B/E จะได้แก้แค่ไฟล์นี้ไฟล์เดียว
+import { api } from "../utils/api";
+import { setCookie } from "../utils/cookie";
 
-import { usersInfo } from "../assets/usersInfo";
+export const loginAPI = async (email, password) => {
+  try {
+    const response = await api.post("/auth/login", { email, password });
+    
+    // The backend returns { token, user: { id, name, role } }
+    if (response.token) {
+      setCookie("token", response.token, 7);
+    }
+    // Return the user object for the context, including the token
+    return { ...response.user, token: response.token };
+    } catch (err) {
+    console.error("Auth Service Error:", err);
+    throw new Error(err.message || "ระบบตรวจสอบข้อมูลขัดข้อง");
+    }
+    };
 
-console.log("Check Data:", usersInfo);
+    export const registerAPI = async (userData) => {
+    try {
+    const response = await api.post("/auth/register", userData);
 
-export const loginAPI = async (username, password) => {
-  // จำลองความหน่วงของเน็ต 1 วินาที (1000 ms)
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      try {
-        const user = usersInfo.find(
-          (u) => u.username === username && u.password === password,
-        );
+    if (response.token) {
+      setCookie("token", response.token, 7);
+    }
 
-        if (user) {
-          console.log("Login Success:", user);
-          resolve(user);
-        } else {
-          reject(new Error("Username หรือ Password ไม่ถูกต้อง"));
-        }
-      } catch (err) {
-        // ป้องกันกรณีตัวแปร usersInfo พังหรือ import พลาด
-        console.error("Auth Service Error:", err);
-        reject(new Error("ระบบตรวจสอบข้อมูลขัดข้อง"));
-      }
-    }, 1000);
-  });
+    return { ...response.user, token: response.token };
+    } catch (err) {
+    
+
+    console.error("Register Service Error:", err);
+    throw new Error(err.message || "ระบบลงทะเบียนขัดข้อง");
+  }
 };

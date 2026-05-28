@@ -2,8 +2,8 @@
 import { Link } from "react-router-dom";
 
 const LoginCard = ({
-  inputUsername,
-  setInputUsername,
+  inputEmail,
+  setInputEmail,
   inputPassword,
   setInputPassword,
   isLoading,
@@ -23,17 +23,17 @@ const LoginCard = ({
       </div>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-5">
-        {/* ช่องกรอก Username */}
+        {/* ช่องกรอก Email */}
         <div className="flex flex-col gap-2">
           <label className="font-bold text-sm uppercase tracking-wide">
-            Username
+            Email
           </label>
           <input
             className="w-full p-4 bg-[#f0f0f0] border-2 border-[#242424] rounded-xl outline-none focus:bg-white focus:border-[#e4002b] transition-colors"
-            placeholder="Enter your username"
-            value={inputUsername}
-            onChange={(e) => setInputUsername(e.target.value)}
-            type="text"
+            placeholder="Enter your email"
+            value={inputEmail}
+            onChange={(e) => setInputEmail(e.target.value)}
+            type="email"
             required
           />
         </div>

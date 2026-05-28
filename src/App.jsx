@@ -1,11 +1,11 @@
-import React, { useContext } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useContext, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Navbarmenu from "./component/Navbarmenu";
 import CookBoard from "./pages/CookBoard";
 import IndexPage from "./pages/customer/IndexPage";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import CheckoutPage from "./pages/cashier/CheckoutPage";
+import CheckoutPage from "./pages/cashier/CheckOutPage";
 import TableMap from "./pages/shared/TableMap";
 import OrderList from "./pages/cashier/OrderList";
 import OrderHistory from "./pages/cashier/OrderHistory";
@@ -17,51 +17,77 @@ import Reserve from "./component/Reserve";
 // import DeliveryTracking from "./pages/customer/DeliveryTracking";
 import OrderTrackingPage from "./pages/customer/OrderTrackingPage";
 import ProtectedRoute from "./component/ProtectedRoute";
-// นำเข้า UserContext เพื่อให้ปุ่ม Dev ใช้คำสั่ง setMyUserInfo ได้
+
+// Rider Components
+import DriverDashboard from "./component/rider/DriverDashboard";
+import OrderDetail from "./component/rider/OrderDetail";
+import DeliveryHistory from "./component/rider/DeliveryHistory";
+
+// นำเข้า UserContext
 import { UserContext } from "./context/userContext/UserContext";
 
-// Component สำหรับ Dev Mode (จำลองการเข้าทุก role โดยไม่ต้อง log-in)
-const DevRoleSwitcher = () => {
-  // รับก้อน Context มาก่อน (อย่าเพิ่งแกะกล่อง)
-  const userCtx = useContext(UserContext);
-  // ป้องกันแอปพัง: ถ้าหา Context ไม่เจอ (userCtx เป็น undefined) ให้ซ่อนปุ่มไปเลย
-  if (!userCtx) return null;
+// Component for global redirection on public routes
+const GlobalGuard = () => {
+  const { myUserInfo } = useContext(UserContext);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // ถ้าไม่ใช่โหมด Dev (เช่น ตอน Build เอาขึ้นเว็บจริง) จะไม่เรนเดอร์โค้ดนี้เลย
+  useEffect(() => {
+    // List of public paths where we still want to redirect users based on their role
+    const publicPaths = ["/", "/home", "/menu", "/login", "/register"];
+    if (myUserInfo?.role === "cook" && publicPaths.includes(location.pathname)) {
+      navigate("/cookBoard", { replace: true });
+    } else if (myUserInfo?.role === "rider" && publicPaths.includes(location.pathname)) {
+      navigate("/driver", { replace: true });
+    }
+  }, [myUserInfo, location.pathname, navigate]);
+
+  return null;
+};
+
+// Component สำหรับ Dev Mode
+const DevRoleSwitcher = () => {
+  const userCtx = useContext(UserContext);
+  if (!userCtx) return null;
   if (!import.meta.env.DEV) return null;
-  // ถ้าเจอ Context ค่อยแกะกล่องเอา setMyUserInfo ออกมาใช้
+  
   const { setMyUserInfo } = userCtx;
 
   return (
-    <div className="fixed bottom-0 right-0 bg-black/80 text-white p-3 z-9999 flex gap-3 text-sm rounded-tl-xl border-t-2 border-l-2 border-[#e4002b] shadow-2xl backdrop-blur-sm">
+    <div className="fixed bottom-0 right-0 bg-black/80 text-white p-3 z-[9999] flex gap-3 text-sm rounded-tl-xl border-t-2 border-l-2 border-[#e4002b] shadow-2xl backdrop-blur-sm">
       <span className="font-black text-yellow-400 font-['Bebas_Neue'] tracking-wider">
         DEV MODE :
       </span>
       <button
-        className="hover:text-[#e4002b] transition-colors font-bold"
-        onClick={() =>
-          setMyUserInfo({ role: "customer", name: "Dev Customer" })
-        }
+        className="hover:text-[#e4002b] transition-colors font-bold cursor-pointer"
+        onClick={() => setMyUserInfo({ role: "customer", name: "Dev Customer" })}
       >
         Customer
       </button>
       <span className="opacity-30">|</span>
       <button
-        className="hover:text-[#e4002b] transition-colors font-bold"
+        className="hover:text-[#e4002b] transition-colors font-bold cursor-pointer"
         onClick={() => setMyUserInfo({ role: "cook", name: "Dev Cook" })}
       >
         Cook
       </button>
       <span className="opacity-30">|</span>
       <button
-        className="hover:text-[#e4002b] transition-colors font-bold"
+        className="hover:text-[#e4002b] transition-colors font-bold cursor-pointer"
         onClick={() => setMyUserInfo({ role: "cashier", name: "Dev Cashier" })}
       >
         Cashier
       </button>
       <span className="opacity-30">|</span>
       <button
-        className="text-red-400 hover:text-red-500 transition-colors font-bold"
+        className="hover:text-[#e4002b] transition-colors font-bold cursor-pointer"
+        onClick={() => setMyUserInfo({ role: "rider", name: "Dev Rider" })}
+      >
+        Rider
+      </button>
+      <span className="opacity-30">|</span>
+      <button
+        className="text-red-400 hover:text-red-500 transition-colors font-bold cursor-pointer"
         onClick={() => setMyUserInfo(null)}
       >
         Clear
@@ -73,19 +99,19 @@ const DevRoleSwitcher = () => {
 export default function App() {
   return (
     <Router>
+      <GlobalGuard />
       <Navbarmenu />
       <DevRoleSwitcher />
 
       <Routes>
-        {/* PUBLIC ROUTES (ใครก็เข้าได้ ไม่ต้องล็อกอิน) */}
+        {/* PUBLIC ROUTES */}
         <Route path="/" element={<IndexPage />} />
         <Route path="/home" element={<IndexPage />} />
         <Route path="/menu" element={<MenuPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
-        {/* CUSTOMER ROUTES (ต้องล็อกอิน และเป็น Customer) */}
-
+        
+        {/* CUSTOMER ROUTES */}
         <Route
           path="/order"
           element={
@@ -118,20 +144,30 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* RIDER ROUTES */}
         <Route
-          path="/reserve-test"
+          path="/driver"
           element={
-            <Reserve 
-              isOpen={true} 
-              onClose={() => window.location.href = "/"}
-              tableNo="T-001"
-              detail="จองโต๊ะริมหน้าต่าง"
-              person="4 ท่าน"
-              date="2024-05-20"
-              time="18:30"
-              menuList={["ไก่ทอด 8 ชิ้น", "เฟรนช์ฟรายส์ (ใหญ่)"]}
-              comment="ขอเก้าอี้เด็ก 1 ตัว"
-            />
+            <ProtectedRoute allowedRoles={["rider"]}>
+              <DriverDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/driver/order/:orderId"
+          element={
+            <ProtectedRoute allowedRoles={["rider"]}>
+              <OrderDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/driver/history"
+          element={
+            <ProtectedRoute allowedRoles={["rider"]}>
+              <DeliveryHistory />
+            </ProtectedRoute>
           }
         />
 
@@ -171,11 +207,11 @@ export default function App() {
           }
         />
 
-        {/* SHARED ROUTES (เข้าได้มากกว่า 1 Role) */}
+        {/* SHARED ROUTES */}
         <Route
           path="/shared/tables"
           element={
-            <ProtectedRoute allowedRoles={["cashier", "cook"]}>
+            <ProtectedRoute allowedRoles={["cashier"]}>
               <TableMap />
             </ProtectedRoute>
           }

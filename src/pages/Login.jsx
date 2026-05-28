@@ -11,7 +11,7 @@ export default function Login() {
 
   // --- States ---
   const [loginText, setLoginText] = useState("");
-  const [inputUsername, setInputUsername] = useState("");
+  const [inputEmail, setInputEmail] = useState("");
   const [inputPassword, setInputPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,7 +31,7 @@ export default function Login() {
     setLoginText("");
 
     try {
-      const user = await loginAPI(inputUsername, inputPassword);
+      const user = await loginAPI(inputEmail, inputPassword);
       setMyUserInfo(user);
       // การนำทาง (Navigation) จะถูกจัดการโดย useEffect ด้านบนเมื่อ myUserInfo เปลี่ยนแปลง
     } catch (error) {
@@ -80,8 +80,8 @@ export default function Login() {
         <div className="flex-1 flex justify-center w-full">
           {!myUserInfo ? (
             <LoginCard
-              inputUsername={inputUsername}
-              setInputUsername={setInputUsername}
+              inputEmail={inputEmail}
+              setInputEmail={setInputEmail}
               inputPassword={inputPassword}
               setInputPassword={setInputPassword}
               isLoading={isLoading}

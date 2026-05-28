@@ -1,12 +1,11 @@
 import { useContext, useState } from "react";
 import { UserContext } from "../context/userContext/UserContext";
 import { Link, useNavigate } from "react-router-dom";
-import { usersInfo } from "../assets/usersInfo";
+import { registerAPI } from "../services/authService";
 import {
   User,
   Mail,
   Lock,
-  CheckCircle,
   AlertCircle,
   ArrowLeft,
 } from "lucide-react"; // เพิ่ม Icons
@@ -25,72 +24,51 @@ export default function Register() {
     email: "",
   });
 
-  // 2. State for validation feedback
-  const [availability, setAvailability] = useState({
-    username: "",
-    email: "",
-  });
-
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // 3. Check if username/email exists in our mock data
-  const checkAvailability = (value, type) => {
-    if (!value) {
-      setAvailability((prev) => ({ ...prev, [type]: "" }));
-      return;
-    }
-    const exists = usersInfo.find((u) => u[type] === value);
-    setAvailability((prev) => ({
-      ...prev,
-      [type]: exists ? "alreadyExists" : "available",
-    }));
-  };
 
   // 4. Generic handle change for all inputs
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Trigger availability check for specific fields
-    if (name === "username" || name === "email") {
-      checkAvailability(value, name);
-    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsLoading(true);
 
     // Validation Logic
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match! รหัสผ่านไม่ตรงกันครับ");
+      setIsLoading(false);
       return;
     }
 
-    if (
-      availability.username === "alreadyExists" ||
-      availability.email === "alreadyExists"
-    ) {
-      setError(
-        "Please resolve the conflicts first! กรุณาเปลี่ยน Username หรือ Email ที่ซ้ำก่อนครับ",
-      );
-      return;
+    try {
+      // Create new user object
+      const newUser = await registerAPI({
+        name: formData.name,
+        surname: formData.surname,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        role: "customer", // Default role
+      });
+
+      console.log("Registered User:", newUser);
+
+      // บันทึกเข้า Context
+      setMyUserInfo(newUser);
+
+      // แจ้งเตือนสวยๆ แล้วพากลับหน้าหลัก หรือหน้าเมนู
+      alert("ยินดีต้อนรับสู่ Serious Club! สมัครสมาชิกสำเร็จ");
+      navigate("/menu"); 
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
-
-    // Create new user object
-    const newUser = {
-      ...formData,
-      role: "customer", // Default role
-    };
-
-    console.log("Registering User:", newUser);
-
-    // บันทึกเข้า Context (ในระบบจริงตรงนี้จะยิง API)
-    setMyUserInfo(newUser);
-
-    // แจ้งเตือนสวยๆ แล้วพากลับหน้าหลัก หรือหน้าเมนู
-    alert("ยินดีต้อนรับสู่ Serious Club! สมัครสมาชิกสำเร็จ");
-    navigate("lastPage"); // สมัครเสร็จมักจะพาไปหน้าเมนูเลย
   };
 
   return (
@@ -180,25 +158,9 @@ export default function Register() {
                 value={formData.username}
                 onChange={handleChange}
                 placeholder="Create a cool username"
-                className={`w-full border-2 rounded-xl p-3 pl-10 focus:outline-none transition-all ${
-                  availability.username === "alreadyExists"
-                    ? "border-[#e4002b] focus:ring-[#e4002b]"
-                    : availability.username === "available"
-                      ? "border-green-500 focus:ring-green-500"
-                      : "border-[#242424] focus:ring-[#e4002b] focus:border-[#e4002b]"
-                }`}
+                className="w-full border-2 border-[#242424] rounded-xl p-3 pl-10 focus:outline-none focus:ring-2 focus:ring-[#e4002b] focus:border-[#e4002b] transition-all"
               />
             </div>
-            {availability.username === "alreadyExists" && (
-              <span className="text-[#e4002b] text-xs font-bold flex items-center gap-1 mt-1">
-                <AlertCircle size={12} /> Username taken
-              </span>
-            )}
-            {availability.username === "available" && (
-              <span className="text-green-600 text-xs font-bold flex items-center gap-1 mt-1">
-                <CheckCircle size={12} /> Available!
-              </span>
-            )}
           </div>
 
           {/* Email */}
@@ -218,18 +180,9 @@ export default function Register() {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="you@example.com"
-                className={`w-full border-2 rounded-xl p-3 pl-10 focus:outline-none transition-all ${
-                  availability.email === "alreadyExists"
-                    ? "border-[#e4002b] focus:ring-[#e4002b]"
-                    : "border-[#242424] focus:ring-[#e4002b] focus:border-[#e4002b]"
-                }`}
+                className="w-full border-2 border-[#242424] rounded-xl p-3 pl-10 focus:outline-none focus:ring-2 focus:ring-[#e4002b] focus:border-[#e4002b] transition-all"
               />
             </div>
-            {availability.email === "alreadyExists" && (
-              <span className="text-[#e4002b] text-xs font-bold flex items-center gap-1 mt-1">
-                <AlertCircle size={12} /> Email already registered
-              </span>
-            )}
           </div>
 
           {/* Password */}
@@ -283,9 +236,10 @@ export default function Register() {
         {/* ปุ่ม Submit */}
         <button
           type="submit"
-          className="mt-8 w-full bg-[#e4002b] text-white py-4 rounded-xl font-['Bebas_Neue'] text-2xl tracking-widest border-2 border-[#242424] shadow-[6px_6px_0_#242424] hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0_#242424] transition-all cursor-pointer"
+          disabled={isLoading}
+          className="mt-8 w-full bg-[#e4002b] text-white py-4 rounded-xl font-['Bebas_Neue'] text-2xl tracking-widest border-2 border-[#242424] shadow-[6px_6px_0_#242424] hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0_#242424] transition-all cursor-pointer disabled:opacity-50"
         >
-          SIGN UP NOW
+          {isLoading ? "SIGNING UP..." : "SIGN UP NOW"}
         </button>
 
         {/* ลิงก์ไป Login */}
