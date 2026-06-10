@@ -20,6 +20,7 @@ import WasteLog from "./pages/WasteLog"
 import Promotions from "./pages/Promotions"
 import Customers from "./pages/Customers"
 import Staff from "./pages/Staff"
+import OperationSetting from "./pages/OperationSetting"
 import Login from "./pages/Login"
 
 const LoginRoute = () => {
@@ -62,6 +63,7 @@ const router = createBrowserRouter([
       { path: "promotions", element: <Promotions /> },
       { path: "customers", element: <Customers /> },
       { path: "staff", element: <Staff /> },
+      { path: "operation-setting", element: <OperationSetting /> },
     ],
   },
   { path: "*", element: <Navigate to="/" replace /> }

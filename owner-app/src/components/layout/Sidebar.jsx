@@ -8,6 +8,7 @@ import {
   PlusCircle, 
   User, 
   Users, 
+  Settings,
   LogOut 
 } from 'lucide-react'
 import SidebarNavItem from './SidebarNavItem'
@@ -91,6 +92,7 @@ export default function Sidebar() {
             Credentials
           </div>
           <SidebarNavItem to="/staff" icon={<Users size={18} />} label="พนักงาน" onClick={closeSidebar} />
+          <SidebarNavItem to="/operation-setting" icon={<Settings size={18} />} label="ตั้งค่าระบบ" onClick={closeSidebar} />
         </div>
 
         {/* Log out */}

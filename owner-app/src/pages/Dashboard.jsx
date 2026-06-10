@@ -9,7 +9,6 @@ import RecentOrdersList from '../components/dashboard/RecentOrdersList'
 import StockAlertCard from '../components/dashboard/StockAlertCard'
 import RecentWasteCard from '../components/dashboard/RecentWasteCard'
 import PromotionPerformanceCard from '../components/dashboard/PromotionPerformanceCard'
-import BookingConfigCard from '../components/dashboard/BookingConfigCard'
 
 export default function Dashboard() {
   const [period, setPeriod] = useState('week');
@@ -209,7 +208,6 @@ export default function Dashboard() {
           <StockAlertCard />
           <RecentWasteCard />
           <PromotionPerformanceCard />
-          <BookingConfigCard />
         </div>
 
       </div>
