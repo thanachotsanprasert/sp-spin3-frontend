@@ -11,7 +11,7 @@ export const useBookingConfig = () => {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const data = await api.get('/api/config/booking')
+        const data = await api.get('/config/booking')
         if (data && data.oneTwoMin !== undefined) {
           setConfig(data)
         }
