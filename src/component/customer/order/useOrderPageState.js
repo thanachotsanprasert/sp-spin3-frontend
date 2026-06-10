@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, useCallback, useMemo, useRef } from "react";
+import { useBookingConfig } from "../../../hooks/useBookingThresholds";
 import { useNavigate, useLocation } from "react-router-dom";
 import { OrdersContext } from "../../../context/ordersContext/OrdersContext";
 import { UserContext } from "../../../context/userContext/UserContext";

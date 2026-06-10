@@ -13,7 +13,7 @@ import { orderService } from "../../services/orderService";
 import { tableService } from "../../services/tableService";
 import { toCashierOrder } from "../../utils/cashierOrders";
 import { getSocketUrl } from "../../utils/realtime";
-import { useBookingConfig } from "../../hooks/useBookingConfig";
+import { useBookingConfig } from "../../hooks/useBookingThresholds";
 
 const TIME_SLOTS = [
   "10:00 - 12:00",
