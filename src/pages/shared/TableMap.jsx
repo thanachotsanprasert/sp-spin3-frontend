@@ -13,6 +13,7 @@ import { orderService } from "../../services/orderService";
 import { tableService } from "../../services/tableService";
 import { toCashierOrder } from "../../utils/cashierOrders";
 import { getSocketUrl } from "../../utils/realtime";
+import { useBookingConfig } from "../../hooks/useBookingConfig";
 
 const TIME_SLOTS = [
   "10:00 - 12:00",
@@ -64,11 +65,11 @@ const toTableView = (table) => ({
   baseStatus: toTableStatus(table.status),
 });
 
-const getOrderPax = (order) => {
+const getOrderPax = (order, config) => {
   if (order?.reservationPax) return order.reservationPax;
   const total = order?.payment?.amount || order?.totalAmount || 0;
-  if (total >= 2500) return 10;
-  if (total >= 1200) return 6;
+  if (total >= config.sevenTenMin) return 10;
+  if (total >= config.threeSixMin) return 6;
   return 2;
 };
 
@@ -80,7 +81,7 @@ const getReservationStatus = (order) => {
   return "RESERVED";
 };
 
-const toReservation = (order) => ({
+const toReservation = (order, config) => ({
   id: order.orderId || `#${String(order._id).slice(-6).toUpperCase()}`,
   backendId: order._id,
   tableId: order.tableId || "",
@@ -88,7 +89,7 @@ const toReservation = (order) => ({
   timeSlot: TIME_SLOTS.find((slot) => normalizeSlot(slot) === normalizeSlot(order.bookingTime)) || order.bookingTime || TIME_SLOTS[0],
   name: order.customer?.name || order.customer?.username || "Reservation Guest",
   phone: order.customer?.contact || "",
-  pax: getOrderPax(order),
+  pax: getOrderPax(order, config),
   status: getReservationStatus(order),
   startTime: getReservationStatus(order) === "OCCUPIED" ? new Date(order.createdAt).getTime() : null,
   raw: order,
@@ -96,6 +97,7 @@ const toReservation = (order) => ({
 
 export default function TableMap() {
   const navigate = useNavigate();
+  const config = useBookingConfig();
   const [tables, setTables] = useState([]);
   const [orders, setOrders] = useState([]);
   const [selectedDate, setSelectedDate] = useState(getTodayValue());
@@ -176,7 +178,7 @@ export default function TableMap() {
     return () => window.removeEventListener("resize", handleResize);
   }, [currentView]);
 
-  const reservations = useMemo(() => orders.map(toReservation), [orders]);
+  const reservations = useMemo(() => orders.map((o) => toReservation(o, config)), [orders, config]);
   const reservationsForSlot = useMemo(
     () =>
       reservations.filter(

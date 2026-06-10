@@ -224,7 +224,10 @@ const ReserveDetails = ({
   isOneTwoUnlocked,
   isThreeSixUnlocked,
   isSevenTenUnlocked,
-  isTierLocked
+  isTierLocked,
+  oneTwoMin,
+  threeSixMin,
+  sevenTenMin
 }) => {
   const timeSlots = [
     { label: "10:00 - 12:00", value: "10:00-12:00" },
@@ -305,13 +308,13 @@ const ReserveDetails = ({
           className="w-full bg-white border-2 border-black rounded-xl p-2.5 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-[#DC5F00]"
         >
           <option value="1-2P" disabled={!isOneTwoUnlocked}>
-            1-2 People {!isOneTwoUnlocked ? "🔒 (Requires >= ฿600)" : "✅"}
+            1-2 People {!isOneTwoUnlocked ? `🔒 (Requires >= ฿${oneTwoMin})` : "✅"}
           </option>
           <option value="3-6P" disabled={!isThreeSixUnlocked}>
-            3-6 People {!isThreeSixUnlocked ? "🔒 (Requires >= ฿1200)" : "✅"}
+            3-6 People {!isThreeSixUnlocked ? `🔒 (Requires >= ฿${threeSixMin})` : "✅"}
           </option>
           <option value="7-10P" disabled={!isSevenTenUnlocked}>
-            7-10 People {!isSevenTenUnlocked ? "🔒 (Requires >= ฿2500)" : "✅"}
+            7-10 People {!isSevenTenUnlocked ? `🔒 (Requires >= ฿${sevenTenMin})` : "✅"}
           </option>
           <option value="11+">11+ People (Contact Staff) 📞</option>
         </select>
@@ -387,7 +390,10 @@ const OrderDetailsPanel = ({
   setNoteGlobal,
   isOneTwoUnlocked,
   isThreeSixUnlocked,
-  isSevenTenUnlocked
+  isSevenTenUnlocked,
+  oneTwoMin,
+  threeSixMin,
+  sevenTenMin
 }) => (
   <div className="lg:col-span-4 bg-white rounded-3xl sm:rounded-4xl p-4 sm:p-6 border-4 border-[#242424] shadow-[5px_5px_0_#242424] sm:shadow-[8px_8px_0_#242424] space-y-5 sm:space-y-6 min-w-0">
     <h2 className="text-xl sm:text-2xl font-['Bebas_Neue'] tracking-widest uppercase border-b-2 border-[#eeeeee] pb-2 flex items-center gap-2">
@@ -441,6 +447,9 @@ const OrderDetailsPanel = ({
           isOneTwoUnlocked={isOneTwoUnlocked}
           isThreeSixUnlocked={isThreeSixUnlocked}
           isSevenTenUnlocked={isSevenTenUnlocked}
+          oneTwoMin={oneTwoMin}
+          threeSixMin={threeSixMin}
+          sevenTenMin={sevenTenMin}
           isTierLocked={
             (reserveMembers === "1-2P" && !isOneTwoUnlocked) ||
             (reserveMembers === "3-6P" && !isThreeSixUnlocked) ||

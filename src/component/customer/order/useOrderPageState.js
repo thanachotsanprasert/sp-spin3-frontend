@@ -413,17 +413,18 @@ export const useOrderPageState = () => {
   const netTotal = subTotal + tax;
   const payableTotal = useMemo(() => Math.round(netTotal * 100) / 100, [netTotal]);
 
-  const isOneTwoUnlocked = subTotal >= 600;
-  const isThreeSixUnlocked = subTotal >= 1200;
-  const isSevenTenUnlocked = subTotal >= 2500;
+  const { oneTwoMin, threeSixMin, sevenTenMin } = useBookingConfig();
+  const isOneTwoUnlocked = subTotal >= oneTwoMin;
+  const isThreeSixUnlocked = subTotal >= threeSixMin;
+  const isSevenTenUnlocked = subTotal >= sevenTenMin;
 
   const isReserveBelowMinimum = useMemo(() => {
     if (eatType !== "reserve") return false;
-    if (reserveMembers === "1-2P" && subTotal < 600) return true;
-    if (reserveMembers === "3-6P" && subTotal < 1200) return true;
-    if (reserveMembers === "7-10P" && subTotal < 2500) return true;
+    if (reserveMembers === "1-2P" && subTotal < oneTwoMin) return true;
+    if (reserveMembers === "3-6P" && subTotal < threeSixMin) return true;
+    if (reserveMembers === "7-10P" && subTotal < sevenTenMin) return true;
     return false;
-  }, [eatType, reserveMembers, subTotal]);
+  }, [eatType, reserveMembers, subTotal, oneTwoMin, threeSixMin, sevenTenMin]);
 
   const isFutureReservation = eatType === "reserve" && isFutureDateValue(reserveDate);
 
@@ -480,15 +481,15 @@ export const useOrderPageState = () => {
 
   useEffect(() => {
     if (eatType === "reserve") {
-      if (reserveMembers === "7-10P" && subTotal < 2500) {
-        if (subTotal >= 1200) setReserveMembers("3-6P");
-        else if (subTotal >= 600) setReserveMembers("1-2P");
+      if (reserveMembers === "7-10P" && subTotal < sevenTenMin) {
+        if (subTotal >= threeSixMin) setReserveMembers("3-6P");
+        else if (subTotal >= oneTwoMin) setReserveMembers("1-2P");
       }
-      if (reserveMembers === "3-6P" && subTotal < 1200) {
-        if (subTotal >= 600) setReserveMembers("1-2P");
+      if (reserveMembers === "3-6P" && subTotal < threeSixMin) {
+        if (subTotal >= oneTwoMin) setReserveMembers("1-2P");
       }
     }
-  }, [subTotal, eatType, reserveMembers]);
+  }, [subTotal, eatType, reserveMembers, oneTwoMin, threeSixMin, sevenTenMin]);
 
   const handleUpdateQty = useCallback((itemId, change) => {
     updateCartQty(itemId, change);
@@ -950,6 +951,9 @@ export const useOrderPageState = () => {
     isOneTwoUnlocked,
     isThreeSixUnlocked,
     isSevenTenUnlocked,
+    oneTwoMin,
+    threeSixMin,
+    sevenTenMin,
     formattedBranchName,
     isPolling,
     pollingStep,
