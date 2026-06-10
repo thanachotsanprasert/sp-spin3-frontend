@@ -11,5 +11,12 @@ export default defineConfig({
       '@owner-app': path.resolve(__dirname, './owner-app/src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        entryFileNames: 'assets/[name]-[hash].js',
+        chunkFileNames: 'assets/[name]-[hash].js',
+      }
+    }
+  }
 })
-
