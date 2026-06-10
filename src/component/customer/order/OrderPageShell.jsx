@@ -47,6 +47,9 @@ const OrderPageShell = () => {
     isOneTwoUnlocked,
     isThreeSixUnlocked,
     isSevenTenUnlocked,
+    oneTwoMin,
+    threeSixMin,
+    sevenTenMin,
     handleUpdateQty,
     handleRemove,
     handleUpdateNote,
@@ -110,6 +113,9 @@ const OrderPageShell = () => {
             isOneTwoUnlocked={isOneTwoUnlocked}
             isThreeSixUnlocked={isThreeSixUnlocked}
             isSevenTenUnlocked={isSevenTenUnlocked}
+            oneTwoMin={oneTwoMin}
+            threeSixMin={threeSixMin}
+            sevenTenMin={sevenTenMin}
           />
 
           <OrderSummary
