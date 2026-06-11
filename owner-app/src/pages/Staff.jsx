@@ -4,7 +4,7 @@ import { useStaff } from '../hooks/useStaff'
 import StaffRow from '../components/staff/StaffRow'
 
 export default function Staff() {
-  const { staff, isLoading, toggleLock, inviteStaff } = useStaff();
+  const { staff, isLoading, toggleLock, inviteStaff, removeStaff } = useStaff();
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('All');
 
@@ -136,6 +136,7 @@ export default function Staff() {
                       key={member.id}
                       member={member}
                       onToggleLock={(id, isLocked) => toggleLock({ id, isLocked })}
+                      onDelete={(id) => removeStaff({ id })}
                     />
                   ))
                 ) : (

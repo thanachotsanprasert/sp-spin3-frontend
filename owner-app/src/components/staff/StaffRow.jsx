@@ -1,9 +1,9 @@
-import { Lock, Unlock, Mail, Clock, MoreVertical } from 'lucide-react'
+import { Lock, Unlock, Mail, Clock, MoreVertical, Trash2 } from 'lucide-react'
 import { STAFF_ROLE_STYLES } from '../../utils/statusStyles'
 import { formatDate } from '../../utils/format'
 import Badge from '../common/Badge'
 
-export default function StaffRow({ member, onToggleLock }) {
+export default function StaffRow({ member, onToggleLock, onDelete }) {
   const roleStyle = STAFF_ROLE_STYLES[member.role];
   const initials = member.name.split(' ').map(n => n[0]).join('');
 
@@ -77,6 +77,19 @@ export default function StaffRow({ member, onToggleLock }) {
               {member.isLocked ? <Lock size={18} /> : <Unlock size={18} />}
             </button>
           )}
+          
+          <button 
+            onClick={() => {
+              if (window.confirm('Delete ' + member.name + '?')) {
+                onDelete(member.id)
+              }
+            }}
+            className="p-1.5 text-brand-text-tertiary hover:text-brand-danger transition-colors rounded-lg hover:bg-brand-danger-bg"
+            title="Delete Staff"
+          >
+            <Trash2 size={18} />
+          </button>
+
           <button className="p-2 hover:bg-brand-sidebar rounded-lg text-brand-text-tertiary hover:text-brand-text-secondary transition-colors">
             <MoreVertical size={16} />
           </button>

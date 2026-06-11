@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getStock, updateStockLot } from '../api/stock';
+import { getStock, updateStockLot, deleteLot } from '../api/stock';
 
 export const useStock = () => {
   const [stock, setStock] = useState([]);
@@ -37,5 +37,15 @@ export const useStock = () => {
     await fetchStock();
   };
 
-  return { stock, isLoading, isError, updateLot, fetchStock };
+  const removeLot = async ({ id }) => {
+    try {
+      await deleteLot(id)
+      await fetchStock()
+    } catch (err) {
+      console.error('Delete lot failed:', err.message)
+      throw err
+    }
+  }
+
+  return { stock, isLoading, isError, updateLot, removeLot, fetchStock };
 };

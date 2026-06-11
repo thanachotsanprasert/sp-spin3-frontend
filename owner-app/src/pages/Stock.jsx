@@ -51,7 +51,7 @@ const toTwoDecimalNumber = (value) => {
 };
 
 export default function Stock() {
-  const { stock, isLoading, fetchStock, updateLot } = useStock();
+  const { stock, isLoading, fetchStock, updateLot, removeLot } = useStock();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -204,6 +204,7 @@ export default function Stock() {
                       key={lot.id}
                       lot={lot}
                       onEdit={handleEditLot}
+                      onDelete={(id) => removeLot({ id })}
                     />
                   ))
                 ) : (

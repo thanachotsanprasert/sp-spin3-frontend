@@ -1,8 +1,8 @@
-import { X, Plus, Printer, ArrowRightLeft, CreditCard, ShoppingBag } from 'lucide-react'
+import { X, Plus, Printer, ArrowRightLeft, CreditCard, ShoppingBag, Trash2 } from 'lucide-react'
 import { TABLE_STATUS_STYLES } from '../../utils/statusStyles'
 import { formatTHB } from '../../utils/format'
 
-export default function TableDetailModal({ table, order, onClose, onUpdateStatus }) {
+export default function TableDetailModal({ table, order, onClose, onUpdateStatus, onDelete }) {
   if (!table) return null;
 
   const isOccupied = table.status !== 'Available';
@@ -33,12 +33,25 @@ export default function TableDetailModal({ table, order, onClose, onUpdateStatus
               </div>
             </div>
           </div>
-          <button 
-            onClick={onClose}
-            className="p-2 hover:bg-brand-sidebar rounded-lg text-brand-text-secondary transition-colors"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => {
+                if (window.confirm('Delete Table ' + table.number + '?')) {
+                  onDelete?.(table.id)
+                }
+              }}
+              className="p-2 hover:bg-brand-danger-bg text-brand-text-tertiary hover:text-brand-danger rounded-lg transition-colors"
+              title="Delete Table"
+            >
+              <Trash2 size={20} />
+            </button>
+            <button 
+              onClick={onClose}
+              className="p-2 hover:bg-brand-sidebar rounded-lg text-brand-text-secondary transition-colors"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Content */}

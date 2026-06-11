@@ -8,7 +8,7 @@ import TableCard from '../components/tables/TableCard'
 import TableDetailModal from '../components/tables/TableDetailModal'
 
 export default function Tables() {
-  const { tables, isLoading: tablesLoading, updateTableStatus, addTable } = useTables();
+  const { tables, isLoading: tablesLoading, updateTableStatus, addTable, removeTable } = useTables();
   const { orders, isLoading: ordersLoading } = useOrders();
   const { tableView, setTableView } = useUIStore();
 
@@ -219,6 +219,10 @@ export default function Tables() {
           order={getTableOrder(selectedTable.id)}
           onClose={() => setSelectedTable(null)}
           onUpdateStatus={handleUpdateStatus}
+          onDelete={async (id) => { 
+            await removeTable({ id }); 
+            setSelectedTable(null) 
+          }}
         />
       )}
     </div>

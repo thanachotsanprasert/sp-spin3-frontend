@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getStaff, updateStaffStatus, inviteStaff } from '../api/staff';
+import { getStaff, updateStaffStatus, inviteStaff, deleteStaff as deleteStaffAPI } from '../api/staff';
 
 export const useStaff = () => {
   const [staff, setStaff] = useState([]);
@@ -31,11 +31,22 @@ export const useStaff = () => {
     await fetchStaff();
   };
 
+  const removeStaff = async ({ id }) => {
+    try {
+      await deleteStaffAPI(id)
+      await fetchStaff()
+    } catch (err) {
+      console.error('Delete staff failed:', err.message)
+      throw err
+    }
+  }
+
   return {
     staff,
     isLoading,
     isError,
     toggleLock,
     inviteStaff: inviteStaffFn,
+    removeStaff,
   };
 };

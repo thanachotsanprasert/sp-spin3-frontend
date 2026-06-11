@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { createTable, getTables, updateTable } from '../api/tables';
+import { createTable, getTables, updateTable, deleteTable as deleteTableAPI } from '../api/tables';
 
 export const useTables = () => {
   const [tables, setTables] = useState([]);
@@ -42,5 +42,15 @@ export const useTables = () => {
     await fetchTables();
   };
 
-  return { tables, isLoading, isError, updateTableStatus, addTable, refetch: fetchTables };
+  const removeTable = async ({ id }) => {
+    try {
+      await deleteTableAPI(id)
+      await fetchTables()
+    } catch (err) {
+      console.error('Delete table failed:', err.message)
+      throw err
+    }
+  }
+
+  return { tables, isLoading, isError, updateTableStatus, addTable, removeTable, refetch: fetchTables };
 };

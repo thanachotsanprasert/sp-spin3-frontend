@@ -1,4 +1,4 @@
-import { MoreVertical, Calendar, AlertCircle } from 'lucide-react'
+import { MoreVertical, Calendar, AlertCircle, Trash2 } from 'lucide-react'
 import { getStockStatus } from '../../utils/getStockStatus'
 import { STOCK_STATUS_STYLES } from '../../utils/statusStyles'
 import { formatTHB, formatDate } from '../../utils/format'
@@ -13,7 +13,7 @@ const formatQuantity = (value) => {
   });
 };
 
-export default function StockRow({ lot, onEdit }) {
+export default function StockRow({ lot, onEdit, onDelete }) {
   const status = getStockStatus(lot.quantity, lot.reorderPoint, lot.expiryDate);
   const style = STOCK_STATUS_STYLES[status];
 
@@ -62,12 +62,25 @@ export default function StockRow({ lot, onEdit }) {
         </div>
       </td>
       <td className="py-4 px-6 text-right">
-        <button 
-          onClick={() => onEdit(lot)}
-          className="p-2 hover:bg-brand-sidebar rounded-lg text-brand-text-tertiary hover:text-brand-text-secondary transition-colors"
-        >
-          <MoreVertical size={16} />
-        </button>
+        <div className="flex items-center justify-end gap-2">
+          <button 
+            onClick={() => {
+              if (window.confirm('Delete lot for ' + lot.ingredientName + '?')) {
+                onDelete(lot.id)
+              }
+            }}
+            className="p-2 text-brand-text-tertiary hover:text-brand-danger transition-colors rounded-lg hover:bg-brand-danger-bg"
+            title="Delete Lot"
+          >
+            <Trash2 size={16} />
+          </button>
+          <button 
+            onClick={() => onEdit(lot)}
+            className="p-2 hover:bg-brand-sidebar rounded-lg text-brand-text-tertiary hover:text-brand-text-secondary transition-colors"
+          >
+            <MoreVertical size={16} />
+          </button>
+        </div>
       </td>
     </tr>
   )
