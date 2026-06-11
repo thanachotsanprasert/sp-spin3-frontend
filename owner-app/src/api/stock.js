@@ -9,4 +9,4 @@ export const createIngredient = (data) => api.post('/api/ingredients', data)
 export const addIngredientStock = (id, data) =>
   api.post('/api/ingredients/' + id + '/stock', data)
 
-export const deleteLot = (id) => api.delete(`/api/ingredients/${id}/lots/all`)
+export const deleteLot = (id) => api.delete(`/api/ingredients/${id}`)
