@@ -22,6 +22,7 @@ import Customers from "./pages/Customers"
 import Staff from "./pages/Staff"
 import OperationSetting from "./pages/OperationSetting"
 import Login from "./pages/Login"
+import AdminPanel from './pages/AdminPanel'
 
 const LoginRoute = () => {
   const { isAuthenticated } = useAuth()
@@ -64,6 +65,7 @@ const router = createBrowserRouter([
       { path: "customers", element: <Customers /> },
       { path: "staff", element: <Staff /> },
       { path: "operation-setting", element: <OperationSetting /> },
+      { path: "admin", element: <AdminPanel /> },
     ],
   },
   { path: "*", element: <Navigate to="/" replace /> }
