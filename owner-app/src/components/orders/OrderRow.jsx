@@ -21,14 +21,9 @@ export default function OrderRow({ order, onUpdateStatus, onDelete, onView }) {
   return (
     <tr className="border-b border-brand-border-inner hover:bg-brand-hover-row transition-colors group cursor-pointer">
       <td className="py-4 px-6" onClick={() => onView?.(order)}>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[14px] font-bold text-brand-text-primary group-hover:text-brand-text-dark-neutral group-hover:underline decoration-brand-text-tertiary underline-offset-4">
-            {formatOrderId(order)}
-          </span>
-          <div className="flex items-center gap-1.5 text-[11px] text-brand-text-tertiary">
-            <Clock size={12} />
-            <span>{formatElapsed(order.createdAt)}</span>
-          </div>
+        <div className="flex flex-col">
+          <span className="text-[13px] font-medium text-gray-900">{order.orderId || formatOrderId(order)}</span>
+          <span className="text-[11px] text-gray-400">{order._id || order.id || ''}</span>
         </div>
       </td>
       <td className="py-4 px-6" onClick={() => onView?.(order)}>
@@ -56,6 +51,9 @@ export default function OrderRow({ order, onUpdateStatus, onDelete, onView }) {
       </td>
       <td className="py-4 px-6 text-right" onClick={() => onView?.(order)}>
         <span className="text-[14px] font-bold text-brand-text-primary">{formatTHB(order.total)}</span>
+      </td>
+      <td className="px-4 py-3 text-[13px] text-gray-700">
+        {order.customer?.name || order.customer?.username || '-'}
       </td>
       <td className="py-4 px-6" onClick={() => onView?.(order)}>
         <div className="flex justify-center">
